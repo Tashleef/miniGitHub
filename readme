@@ -1,0 +1,38 @@
+user can login using email and password
+names should be unique 
+user can have followers 
+and can follow other users
+users can see activities that other users whom they follow 
+so user model should contain the list of followers and the list of following
+and the activities that the user have 
+the activities is making a new project private of public
+user can add anyone to his project 
+projects contain only folders
+the owner of the project can accept the changes of the project by the members only
+the owner of the project can see the changes that happened to the project 
+and he can get the project back to any previous version he want
+users can only view public projects unless they were added to the project
+users can download the public projects or download their private project
+and user can add comments to the edited project
+their are 2 stages before accepting the project
+push to the server with comment 
+accept the changes that happened 
+there is home page where the user see the posts of the people he follows
+posts are any changes that happened to the user public project
+
+
+
+// begin proccess
+signup
+so the user provide the name and the email and the password 
+the system check for an old existing email or username if not existed then
+he check the password to be strong if all the conditions are fulfiled 
+confirmation code will be made
+create the temperory users and add it to the database
+then he create access token and refresh token and save it in the header
+then he redirect the user to the confirmation page
+the token must have the user name and id and if he confirmed the account
+if the user confirmed his email then he will be added to the user list
+else he will be removed from the tempUser table in 3 days
+
+
