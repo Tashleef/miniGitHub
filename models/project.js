@@ -3,6 +3,7 @@ const {userSchema} = require('./user');
 const member = {
     username:String,
     email:String,
+    role:String,
 }
 const projectSchema = new mongoose.Schema({
     projectName:{
@@ -18,14 +19,9 @@ const projectSchema = new mongoose.Schema({
         type:member,
         required:true,
     },
-    memebers:[{
+    members:[{
      type:member,
      unique:true,   
-    }],
-
-    admins:[{
-        type:member,
-        unique:true
     }],
     isPublic:{
         type:Boolean,
@@ -33,14 +29,10 @@ const projectSchema = new mongoose.Schema({
     },
     // rules 
     // 1:get file, 2:edit file, 3:add members, 4:accept edit,5:remove member
-    memberRules:{
+    configuration:{
         type:Number,
-        default:7,
-    },
-    adminRules:{
-        type:Number,
-        default: (1<<5)-1,
-    },
+        default:28,
+    }
 });
 
 const Project = mongoose.model('Project', projectSchema);

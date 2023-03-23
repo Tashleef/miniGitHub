@@ -11,39 +11,33 @@ const addProject = async (req,res)=>{
     if(!errors.isEmpty()) return res.status(404).send(errors.array());
     let file = req.files[0];
     file.originalname = changeFolderName(file.originalname);
-    let isPublic = (req.body.isPublic === true || req.body.isPublic === undefined)?'public':'private';
-    let path = `./uploads/${isPublic}/`;
-    console.log(req.body.isPublic);
+    let isPublic = (req.body.isPublic === true || req.body.isPublic === undefined);
+    let path = `./uploads/${(isPublic)?'public':'private'}/`;
     let projectPath = path+file.originalname;
     
     try{
-        let adminRules = (req.body.adminRules <=31)?req.body.adminRules:31;
-        let memberRules = (req.body.memberRules <=7)?req.body.memberRules:7;
-        let rules = adminRules | memberRules;
-        if(rules !== adminRules || rules === memberRules){
-            return res.status(404).send({message:"configuration are not correct"});
+        let configuration = (req.body.configuration >24 || !req.body.configuration)?24:req.body.configuration;
+        const member = {
+            email:req.user.email,
+            username:req.user.name,
+            role:"owner",
         }
         const project = new Project({
             projectName:req.body.projectName,
             projectPath:projectPath,
-            owner:{
-                email:req.user.email,
-                username:req.user.name
-                
-            },
-            members:[],
-            isPublic:req.body.isPublic,
-            memberRules:memberRules,
-            adminRules:adminRules
+            owner: member,
+            admins:[member],
+            members:[member],
+            isPublic:isPublic,
+            configuration:configuration
         });
-        console.log(project);
         const results = uploadToFiles(file,path);
-        console.log('res ' + results);
+        if(!results) return res.status(500).send({message:"Something wrong"});
         await project.save();
         return res.status(201).send({message:"Project Created"});
     }catch(err){
         console.log(err.message);
-        return res.status(500).send({message:"something wrong"});
+        return res.status(500).send({message:"Something wrong"});
     }
 }
 
@@ -61,10 +55,47 @@ const getProject = async(req,res)=>{
     }
 }
 
+const editProject = async(req,res)=>{
+
+}
+
+
+const addMember = async(req,res)=>{
+    try{
+        let projectName = req.params.projectName;
+        let project = await Project.findOne({projectName:projectName}).select('members');
+        const user = {
+            username:req.member.name,
+            email:req.member.email,
+            role:"member"
+        }
+        project.members.push(user);
+        await project.save();
+        return res.status(200).send({message:"Member added"});
+
+    }catch(err){
+        console.log(err.message);
+        return res.status(500).send({message:"Someting wrong"});
+    }
+}
+
+const removeMember = async(req,res)=>{
+    try{
+        const projectName = req.params.projectName;
+        let project = await Project.updateOne({projectName:projectName},{$pull:{members:{username:req.body.name}}});
+        await project.save();
+        return res.status(200).send({message:"Member deleted"});
+    }catch(err){
+        console.log(err.message);
+        return res.status(500).send({message:"Something wrong"});
+    }
+}
 
 const projectController = {
     addProject:addProject,
-    getProject:getProject
+    getProject:getProject,
+    addMember:addMember,
+    removeMember:removeMember
 }
 
 module.exports = projectController;
