@@ -8,13 +8,19 @@ const existUser = require("../middleware/existUser");
 const isNotMemberBefore = require("../middleware/isNotMemberBefore");
 const canAddMember = require("../middleware/canAddMember");
 const canDeleteMember = require("../middleware/canDeleteMember");
-const isMember = require('../middleware/isMember');
+const isInTheProject = require('../middleware/isInTheProject');
+const isNotSameMember = require("../middleware/isNotSameMember");
+const canMakeAdmin = require("../middleware/canMakeAdmin");
+
+
+
+
+
 const addProjectMiddleware = [
     authenticated,
     isValidProjectName,
     checkDotExt,
     body('projectName').notEmpty().withMessage('the project name mustn\'t be empty'),
-    //body('isPublic').isBoolean(),
 ];
 
 const getProjectMiddleware = [
@@ -28,21 +34,31 @@ const addMemberMiddleware = [
     existProject,
     canAddMember,
     existUser,
-    isNotMemberBefore
+    isNotMemberBefore,
 ];
 
 const removeMemberMiddleware = [
     authenticated,
     existProject,
     canDeleteMember,
-    existUser,
-    isMember
+    isNotSameMember,
+    isInTheProject,
+    
+]
+
+const makeAdmin = [
+    authenticated,
+    existProject,
+    canMakeAdmin,
+    isInTheProject,
 ]
 
 const middleware = {
     addProjectMiddleware:addProjectMiddleware,
     getProjectMiddleware:getProjectMiddleware,
-    addMemberMiddleware:addMemberMiddleware
+    addMemberMiddleware:addMemberMiddleware,
+    removeMemberMiddleware:removeMemberMiddleware,
+    makeAdmin:makeAdmin
 }
 
 module.exports = middleware;

@@ -1,5 +1,4 @@
-const Token = require('../models/token');
-const jwt = require('jsonwebtoken');
+
 const verifytoken = require('../functions/verifytoken');
 module.exports = async(req,res,next)=>{
     const token = req.cookies.accessToken;
