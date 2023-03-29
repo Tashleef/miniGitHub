@@ -50,17 +50,18 @@ const registerController = async (req,res)=>{
     const errors = validationResult(req);
     if (!errors.isEmpty())  return res.send(errors.array()).status(404);
     
-    const email = req.body.email;
-    const password = req.body.password;
-    const name = req.body.name;
+    const { email, password, name } = req.body;
+
+    // bcrypting the password
     const salt = await bcrypt.genSalt(10);
     const bcryptedPassword = bcrypt.hashSync(password,salt);
-    try{
+
+    
         let user = new User({
-            email:email,
+            email,
             password:bcryptedPassword,
             confirmationCode:generateCode(),
-            name:name,
+            name,
             isVerified:true,
         });
 
@@ -74,16 +75,21 @@ const registerController = async (req,res)=>{
         const accessToken = generateAccessToken(userObject);
         let token = new Token({
             userId:user._id,
-            refreshToken:refreshToken,
-            accessToken:accessToken
+            refreshToken,
+            accessToken
     });
-    user.save();
-    token.save();
-    return res.cookie('accessToken' , 'bearer ' + accessToken).cookie('refreshToken',refreshToken).send({message:"User has been created sucessfully"}).status(201);
-    }catch(err){
-        console.log(err.message);
-        return res.send({message:'something happened'}).status(500);
-    }
+    await user.save();
+    await token.save();
+    return res
+    .cookie('accessToken' , 'bearer ' + accessToken)
+    .cookie(
+        'refreshToken'
+        ,refreshToken
+    )
+    .status(201)
+    .send({ 
+            message: "User has been created sucessfully" 
+     })
 }
 
 const refreshAccessTokenController = (req,res)=>{

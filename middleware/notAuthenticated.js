@@ -1,8 +1,8 @@
+const verifytoken = require("../functions/verifytoken");
+
 module.exports = (req,res,next)=>{
-    if(req.header.token){
-        return res.send({
-            message:"something wrong you are already logged in"
-        }).status(404);
-    }
+    
+    if(verifytoken(req.cookies.accessToken,process.env.ACCESS_TOKEN)) 
+        return res.status(404).send({ message: "You are already logged in" })
     return next();
 }

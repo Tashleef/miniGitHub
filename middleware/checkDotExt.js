@@ -3,7 +3,7 @@ module.exports = (req,res,next)=>{
     let files = req.files;
 
     if(!files) return res.status(404).send('file not found');
-    file = files[0];
+    let file = files[0];
     let ext = '';
     if(file.originalname.split('.').length >1 ){
         ext = file.originalname.substring(file.originalname.lastIndexOf('.'));

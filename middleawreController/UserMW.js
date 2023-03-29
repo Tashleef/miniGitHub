@@ -1,4 +1,4 @@
-const {body}  = require('express-validator')
+const {body}  = require('express-validator');
 
 const notAuthenticated = require("../middleware/notAuthenticated");
 const notRegistered = require('../middleware/notRegistered');
@@ -17,10 +17,10 @@ const loginMiddleware = [
     body('password').notEmpty().withMessage('password must\'t be empty').isStrongPassword().withMessage('incorrect password try again'),
     notAuthenticated,
     registered
-]
+];
 
 const middlewares = {
-    registerMiddleware: registerMiddleware,
-    loginMiddleware:loginMiddleware
+    registerMiddleware,
+    loginMiddleware
 }
 module.exports = middlewares;

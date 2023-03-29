@@ -15,6 +15,10 @@ app.use(cookieParser());
 
   
 app.use(router);
+app.use((err, req, res, next) => {
+  console.error(err.message);
+  return res.status(500).send({ message: 'Something Wrong.' });
+})
 app.listen(3000,()=>{
     console.log('server started');
 });
