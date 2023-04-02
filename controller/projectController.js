@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator');
 const changeFolderName = require('../functions/changeFolderName');
 const deleteFolder = require('../functions/deleteFolder');
 const getFileFromfolder = require('../functions/getFileFromfolder');
+const moveFile = require('../functions/moveFile');
 const uploadToFiles = require('../functions/uploadToFiles');
 const Project = require('../models/project');
 
@@ -74,21 +75,18 @@ const addProject = async (req, res) => {
     return res.download(project.projectPath);
   };
 
-// how edit project will work ?? 
-// i am thinking about you can get back to any stable version
-// middlewares are should be authenticated and member in the project and can edit and the project is not empty and is exe
-const editProject = async (req, res) => {
-     const { projectName } = req.params;
-     const { name,email } = req.user;
-     const { role } = req.role;
+  const editProject = async (req, res) => {
+      const { projectName } = req.params;
+      const { name,email } = req.user;
+      const role  = req.role; 
 
-     const file = req.files[0];
-     file.originalname = changeFolderName(file.originalname);
+      const file = req.files[0];
+      file.originalname = changeFolderName(file.originalname);
 
-    const path = `pending/${ projectName }`;
+      const path = `./pending/${ projectName }`;
 
-    // creating pending object 
-    const pending = {
+      // creating pending object 
+      const pending = {
       member: {
         username: name,
         email,
@@ -106,6 +104,8 @@ const editProject = async (req, res) => {
         pendings: pending
       }
     });
+    const result = uploadToFiles(file, path);
+    if(!result) return res.status(404).send({ message: "Failed uploading the file try again" });
 
     return res.status(200).send({ message: "Edit project request has been sent" });
 
@@ -113,18 +113,45 @@ const editProject = async (req, res) => {
 
 const getPending = async (req, res) => {
   // Extract the "projectName" parameter from the request object
-  const { projectName } = req.params;
-
+  const  { projectName } = req.params;
+  let { pageNumber, pageSize } = req.query;
+  pageSize = (!pageSize || pageSize<1) ? 1: parseInt(pageSize);
+  pageNumber = (!pageNumber || pageNumber<1) ? 1: parseInt(pageNumber);
   // Find a project in the database that matches the "projectName"
+  
   const project = await Project.findOne(
     { projectName },
     // Include only the "pendings" field in the result
-    { pendings: 1 }
-  );
+    { pendings: { $slice: [(pageNumber - 1) * pageSize, pageSize ] } }
+    )
 
   // Send a success response with the "pendings" array
   return res.status(200).send({ message: "Pendings retrieved successfully", pendings: project.pendings });
 }
+
+const acceptPending = async (req, res) => {
+  const { projectName } = req.params;
+  const { fileName } = req.body;
+
+  let isPublic = 'public';
+  // Getting the path for pendings and uploads.
+  const pendings = `./pending/${projectName}/${fileName}`;
+  const uploads = `./uploads/${isPublic}/${projectName}/${fileName}`;
+
+  // moving the file from pendings to uploads
+  if(!moveFile(pendings, uploads, fileName)) return res.status(500).send({ message: "Something wrong" });
+
+  // Deleting the filename from the pending and adding them to version.
+  await Project.findOneAndUpdate( 
+    { projectName }, 
+    { $pull: { pendings: { fileName } } , $push: { versions: fileName } }
+  );
+  
+  return res.status(200).send({ message: "Project File has been accepted" });
+
+
+}
+
 
 const deleteProject = async (req, res) => {
     const projectName = req.params.projectName;
@@ -202,7 +229,8 @@ const projectController = {
     makeAdmin,
     deleteProject,
     editProject,
-    getPending
+    getPending,
+    acceptPending,
 }
 
 module.exports = projectController;
