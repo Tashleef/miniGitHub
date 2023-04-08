@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const memberSchema = new mongoose.Schema({
     username: String,
@@ -8,13 +8,13 @@ const memberSchema = new mongoose.Schema({
 
 const pendingSchema = new mongoose.Schema({
     member: {
-        type:memberSchema,
-        required:true,
+        type: memberSchema,
+        required: true,
     },
     fileName: {
         type: String,
-    }
-})
+    },
+});
 
 const projectSchema = new mongoose.Schema({
     projectName: {
@@ -38,14 +38,18 @@ const projectSchema = new mongoose.Schema({
         type: memberSchema,
         required: true,
     },
-    members: [{
-        type: memberSchema,
-        unique: true,
-    }],
-    pendings: [{
-        type: pendingSchema,
-        default: []
-    }],
+    members: [
+        {
+            type: memberSchema,
+            unique: true,
+        },
+    ],
+    pendings: [
+        {
+            type: pendingSchema,
+            default: [],
+        },
+    ],
     isPublic: {
         type: Boolean,
         default: true,
@@ -61,6 +65,6 @@ const projectSchema = new mongoose.Schema({
         default: 28,
     },
 });
-const Project = mongoose.model('Project', projectSchema);
+const Project = mongoose.model("Project", projectSchema);
 
 module.exports = Project;

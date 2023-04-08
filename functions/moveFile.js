@@ -1,10 +1,9 @@
-const fs  = require('fs');
+const fs = require("fs");
 
-function moveFile(source, destination ) {
+function moveFile(source, destination) {
+    if (!fs.existsSync(source)) return false;
 
-    if(!fs.existsSync(source)) return false;
-
-    fs.rename( source, destination, (err) => {
+    fs.rename(source, destination, (err) => {
         if (err) {
             console.log(err.message);
             throw err;
@@ -12,7 +11,6 @@ function moveFile(source, destination ) {
             return true;
         }
     });
-
 }
 
 module.exports = moveFile;

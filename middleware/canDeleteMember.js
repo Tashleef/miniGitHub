@@ -1,7 +1,6 @@
 const canDoTask = require("../functions/canDoTask");
 
-module.exports = (req,res,next)=>{
-    if(canDoTask("removeMember",req.role,req.configuration))
-        return next();
-    return res.status(401).send({message:"Not authorized"});
-}
+module.exports = (req, res, next) => {
+    if (canDoTask("removeMember", req.role, req.configuration)) return next();
+    return res.status(401).send({message: "Not authorized"});
+};
